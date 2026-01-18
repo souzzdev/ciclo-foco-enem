@@ -244,6 +244,38 @@
       transform: translateY(0);
     }
   }
+
+  .animate-fade-in {
+    animation: fadeIn 0.2s ease-out;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.2s ease-out;
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* Smooth transitions for theme change */
+  * {
+    transition-property: background-color, border-color, color;
+    transition-duration: 0.2s;
+    transition-timing-function: ease-out;
+  }
+
+  /* Exclude animation properties from theme transitions */
+  *[class*="animate-"],
+  *[class*="transition-"] {
+    transition-property: all;
+  }
 }
 
 /* Custom scrollbar */

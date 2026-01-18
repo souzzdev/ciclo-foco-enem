@@ -1,4 +1,5 @@
 import { BookOpen, Clock, RotateCw } from 'lucide-react';
+import { ThemeToggle } from './ThemeToggle';
 
 interface StudyHeaderProps {
   completedCycles: number;
@@ -18,14 +19,17 @@ export function StudyHeader({ completedCycles, totalMinutesStudied }: StudyHeade
 
   return (
     <header className="bg-card rounded-2xl p-5 shadow-sm slide-up">
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-          <BookOpen className="w-6 h-6 text-primary" />
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+            <BookOpen className="w-6 h-6 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-foreground">Ciclo de Estudos</h1>
+            <p className="text-sm text-muted-foreground">ENEM + Ciência da Computação</p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-xl font-bold text-foreground">Ciclo de Estudos</h1>
-          <p className="text-sm text-muted-foreground">ENEM + Ciência da Computação</p>
-        </div>
+        <ThemeToggle />
       </div>
       
       <div className="grid grid-cols-2 gap-3">
