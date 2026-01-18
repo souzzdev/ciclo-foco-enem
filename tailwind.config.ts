@@ -57,6 +57,15 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // Subject colors
+        math: "hsl(var(--math))",
+        "math-light": "hsl(var(--math-light))",
+        nature: "hsl(var(--nature))",
+        "nature-light": "hsl(var(--nature-light))",
+        portuguese: "hsl(var(--portuguese))",
+        "portuguese-light": "hsl(var(--portuguese-light))",
+        human: "hsl(var(--human))",
+        "human-light": "hsl(var(--human-light))",
       },
       borderRadius: {
         lg: "var(--radius)",
