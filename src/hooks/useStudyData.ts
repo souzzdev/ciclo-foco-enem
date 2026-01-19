@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { StudyData, HistoryEntry, INITIAL_DATA } from '@/types/study';
+import { StudyData, StudyBlock, HistoryEntry, INITIAL_DATA } from '@/types/study';
 
 const STORAGE_KEY = 'ciclo-estudos-enem';
 
@@ -162,6 +162,24 @@ export function useStudyData() {
     });
   }, [salvarDados]);
 
+  // Atualizar blocos do ciclo
+  const atualizarBlocos = useCallback((newBlocks: StudyBlock[]) => {
+    setData(prev => {
+      // Ajusta o índice atual se necessário
+      const newIndex = prev.currentBlockIndex >= newBlocks.length 
+        ? 0 
+        : prev.currentBlockIndex;
+      
+      const newData = {
+        ...prev,
+        blocks: newBlocks,
+        currentBlockIndex: newIndex,
+      };
+      salvarDados(newData);
+      return newData;
+    });
+  }, [salvarDados]);
+
   // Carregar dados na inicialização
   useEffect(() => {
     carregarDados();
@@ -175,5 +193,6 @@ export function useStudyData() {
     concluirBloco,
     pularBloco,
     limparHistorico,
+    atualizarBlocos,
   };
 }
