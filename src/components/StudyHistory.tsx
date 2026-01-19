@@ -102,11 +102,16 @@ export function StudyHistory({ history, onClearHistory }: StudyHistoryProps) {
 
       <div className="space-y-2">
         {displayedHistory.map((entry) => (
-          <div key={entry.id} className={`history-item ${subjectBadgeStyles[entry.subjectType]}`}>
-            <span className="text-xl">{subjectIcons[entry.subjectType]}</span>
+          <div key={entry.id} className={`history-item ${subjectBadgeStyles[entry.subjectType]} ${entry.skipped ? 'opacity-60' : ''}`}>
+            <span className="text-xl">{entry.skipped ? '⏭️' : subjectIcons[entry.subjectType]}</span>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
                 <span className="subject-badge text-xs">{entry.subject}</span>
+                {entry.skipped && (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-500">
+                    Pulado
+                  </span>
+                )}
               </div>
               <p className="text-sm text-foreground truncate">{entry.content}</p>
               <p className="text-xs text-muted-foreground mt-1">{formatDate(entry.date)}</p>

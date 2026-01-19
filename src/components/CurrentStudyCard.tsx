@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { StudyBlock, SubjectType } from '@/types/study';
-import { Play, Check, Edit3, Clock } from 'lucide-react';
+import { Play, Check, Edit3, Clock, SkipForward } from 'lucide-react';
 import { PomodoroTimer } from './PomodoroTimer';
 import { ConfirmDialog } from './ConfirmDialog';
 
 interface CurrentStudyCardProps {
   block: StudyBlock;
   onComplete: (content: string) => void;
+  onSkip: () => void;
 }
 
 const subjectBadgeStyles: Record<SubjectType, string> = {
@@ -23,10 +24,11 @@ const subjectIcons: Record<SubjectType, string> = {
   human: '🌍',
 };
 
-export function CurrentStudyCard({ block, onComplete }: CurrentStudyCardProps) {
+export function CurrentStudyCard({ block, onComplete, onSkip }: CurrentStudyCardProps) {
   const [content, setContent] = useState(block.content);
   const [isEditing, setIsEditing] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showSkipConfirm, setShowSkipConfirm] = useState(false);
 
   const handleComplete = () => {
     if (!content.trim()) {
@@ -43,6 +45,12 @@ export function CurrentStudyCard({ block, onComplete }: CurrentStudyCardProps) {
     setShowConfirm(false);
   };
 
+  const confirmSkip = () => {
+    onSkip();
+    setContent('');
+    setShowSkipConfirm(false);
+  };
+
   return (
     <>
       <div className={`study-card study-card-active ${subjectBadgeStyles[block.subjectType]} slide-up`}>
@@ -57,9 +65,18 @@ export function CurrentStudyCard({ block, onComplete }: CurrentStudyCardProps) {
               <p className="text-sm text-muted-foreground mt-1">Bloco {block.id} de 5</p>
             </div>
           </div>
-          <div className="flex items-center gap-1 text-muted-foreground">
-            <Clock className="w-4 h-4" />
-            <span className="text-sm font-medium">{block.duration}min</span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowSkipConfirm(true)}
+              className="p-2 rounded-lg text-muted-foreground hover:text-orange-500 hover:bg-orange-500/10 transition-colors"
+              title="Pular bloco"
+            >
+              <SkipForward className="w-5 h-5" />
+            </button>
+            <div className="flex items-center gap-1 text-muted-foreground">
+              <Clock className="w-4 h-4" />
+              <span className="text-sm font-medium">{block.duration}min</span>
+            </div>
           </div>
         </div>
 
@@ -139,6 +156,16 @@ export function CurrentStudyCard({ block, onComplete }: CurrentStudyCardProps) {
         cancelText="Voltar"
         onConfirm={confirmComplete}
         onCancel={() => setShowConfirm(false)}
+      />
+
+      <ConfirmDialog
+        isOpen={showSkipConfirm}
+        title="Pular bloco?"
+        message={`Você está prestes a pular o bloco de ${block.subject}. Isso será registrado no histórico.`}
+        confirmText="Pular"
+        cancelText="Voltar"
+        onConfirm={confirmSkip}
+        onCancel={() => setShowSkipConfirm(false)}
       />
     </>
   );
