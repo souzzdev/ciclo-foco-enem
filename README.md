@@ -1,73 +1,140 @@
-# Welcome to your Lovable project
+# 🎓 Ciclo Foco ENEM
 
-## Project info
+**Ciclo Foco ENEM** is a study organization system created to help students prepare for the **ENEM (Brazilian National High School Exam)** by **simplifying, organizing, and tracking** what has been studied over time.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+⚠️ **This project was developed with the support of Artificial Intelligence (AI)**, with the purpose of serving as a study assistance tool, helping to structure study cycles in a clear, practical, and accessible way.
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## 💡 About the Project
 
-**Use Lovable**
+**Ciclo Foco ENEM** was designed for students who need more organization and consistency in their study routine.
+Its main goal is to provide a simple interface where students can:
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+* Organize subjects into study cycles
+* Track study progress
+* Have a clear view of their study planning
+* Simplify revisions and maintain focus
 
-Changes made via Lovable will be committed automatically to this repo.
+AI was used as **support for structuring the system, organizing logic, and writing documentation**, without replacing the educational purpose of the project.
 
-**Use your preferred IDE**
+---
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 🚀 Features
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+* 📚 Study cycle organization
+* ✅ Progress tracking
+* 📱 Responsive interface (desktop and mobile)
+* ⚛️ Modern React-based application
+* 🧩 Scalable and extensible structure
+* 🌐 Ready to evolve into a **PWA (Progressive Web App)**
 
-Follow these steps:
+> This project is under continuous development.
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+---
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+## 🛠️ Technologies Used
 
-# Step 3: Install the necessary dependencies.
-npm i
+* **React**
+* **TypeScript**
+* **Vite**
+* **Tailwind CSS**
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+---
+
+## 📁 Project Structure
+
+```
+📦 ciclo-foco-enem
+ ┣ 📂 public
+ ┣ 📂 src
+ ┃ ┣ 📂 components
+ ┃ ┣ 📂 pages
+ ┃ ┣ 📜 App.tsx
+ ┃ ┗ 📜 main.tsx
+ ┣ 📜 index.html
+ ┣ 📜 package.json
+ ┣ 📜 tailwind.config.ts
+ ┗ 📜 vite.config.ts
+```
+
+---
+
+## ▶️ How to Run the Project
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/souzzdev/ciclo-foco-enem.git
+```
+
+2. Navigate to the project folder:
+
+```bash
+cd ciclo-foco-enem
+```
+
+3. Install dependencies:
+
+```bash
+npm install
+```
+
+4. Start the development server:
+
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+5. Open in your browser:
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```
+http://localhost:5173
+```
 
-**Use GitHub Codespaces**
+---
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 📱 PWA (Progressive Web App)
 
-## What technologies are used for this project?
+This project is structured to evolve into a **Progressive Web App (PWA)**, allowing:
 
-This project is built with:
+* Installation as an app on mobile or desktop
+* Partial or full offline usage
+* App-like user experience
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+This feature can be added in the future using a `manifest.json` and a `service worker`.
 
-## How can I deploy this project?
+---
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+## 🤖 Use of Artificial Intelligence
 
-## Can I connect a custom domain to my Lovable project?
+This system was created **with the assistance of AI** as a support tool for:
 
-Yes, you can!
+* Initial project structuring
+* Logic organization
+* Documentation writing
+* Solution design assistance
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+The goal is **educational**, serving as a study support tool to help students better organize their ENEM preparation.
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+---
+
+## 🤝 Contributions
+
+Contributions are welcome!
+You can:
+
+* Open issues
+* Submit pull requests
+* Suggest improvements or new features
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License**.
+See the `LICENSE` file for more details.
+
+---
+
+📚 **Good luck with your studies and stay focused on the ENEM!**
