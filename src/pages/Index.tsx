@@ -4,6 +4,8 @@ import { CycleProgress } from '@/components/CycleProgress';
 import { CurrentStudyCard } from '@/components/CurrentStudyCard';
 import { UpcomingBlocks } from '@/components/UpcomingBlocks';
 import { StudyHistory } from '@/components/StudyHistory';
+import { StreakBadge } from '@/components/StreakBadge';
+import { StatsDashboard } from '@/components/StatsDashboard';
 import { Loader2 } from 'lucide-react';
 
 const Index = () => {
@@ -11,7 +13,8 @@ const Index = () => {
     data, 
     isLoaded, 
     currentBlock, 
-    concluirBloco, 
+    concluirBloco,
+    pularBloco,
     limparHistorico 
   } = useStudyData();
 
@@ -33,6 +36,13 @@ const Index = () => {
           completedCycles={data.completedCycles} 
           totalMinutesStudied={data.totalMinutesStudied} 
         />
+
+        <StreakBadge
+          currentStreak={data.currentStreak}
+          longestStreak={data.longestStreak}
+          todayBlocks={data.todayBlocks}
+          dailyGoal={data.dailyGoal}
+        />
         
         <CycleProgress 
           blocks={data.blocks} 
@@ -41,12 +51,20 @@ const Index = () => {
         
         <CurrentStudyCard 
           block={currentBlock} 
-          onComplete={concluirBloco} 
+          onComplete={concluirBloco}
+          onSkip={pularBloco}
         />
         
         <UpcomingBlocks 
           blocks={data.blocks} 
           currentIndex={data.currentBlockIndex} 
+        />
+
+        <StatsDashboard
+          history={data.history}
+          totalMinutes={data.totalMinutesStudied}
+          completedCycles={data.completedCycles}
+          skippedBlocks={data.skippedBlocks}
         />
         
         <StudyHistory 

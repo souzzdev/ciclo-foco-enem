@@ -15,12 +15,19 @@ export interface HistoryEntry {
   subjectType: SubjectType;
   content: string;
   blockId: number;
+  skipped?: boolean;
 }
 
 export interface StudyData {
   currentBlockIndex: number;
   completedCycles: number;
   totalMinutesStudied: number;
+  skippedBlocks: number;
+  currentStreak: number;
+  longestStreak: number;
+  lastStudyDate: string | null;
+  dailyGoal: number; // blocks per day
+  todayBlocks: number;
   history: HistoryEntry[];
   blocks: StudyBlock[];
 }
@@ -37,6 +44,12 @@ export const INITIAL_DATA: StudyData = {
   currentBlockIndex: 0,
   completedCycles: 0,
   totalMinutesStudied: 0,
+  skippedBlocks: 0,
+  currentStreak: 0,
+  longestStreak: 0,
+  lastStudyDate: null,
+  dailyGoal: 3,
+  todayBlocks: 0,
   history: [],
   blocks: INITIAL_BLOCKS,
 };
