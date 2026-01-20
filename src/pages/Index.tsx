@@ -39,7 +39,7 @@ const Index = () => {
             completedCycles={data.completedCycles} 
             totalMinutesStudied={data.totalMinutesStudied} 
           />
-          <CycleEditor blocks={data.blocks} onSave={atualizarBlocos} />
+          <CycleEditor blocks={data.blocks} dailyGoal={data.dailyGoal} onSave={atualizarBlocos} />
         </div>
 
         <StreakBadge

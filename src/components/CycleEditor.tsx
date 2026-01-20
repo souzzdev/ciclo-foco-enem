@@ -8,7 +8,8 @@ import { Settings, Plus, Trash2, GripVertical, Save, X } from 'lucide-react';
 
 interface CycleEditorProps {
   blocks: StudyBlock[];
-  onSave: (blocks: StudyBlock[]) => void;
+  dailyGoal: number;
+  onSave: (blocks: StudyBlock[], dailyGoal: number) => void;
 }
 
 const subjectTypes: { value: SubjectType; label: string; color: string }[] = [
@@ -20,12 +21,14 @@ const subjectTypes: { value: SubjectType; label: string; color: string }[] = [
 
 const durations = [15, 20, 25, 30, 45, 60];
 
-export function CycleEditor({ blocks, onSave }: CycleEditorProps) {
+export function CycleEditor({ blocks, dailyGoal, onSave }: CycleEditorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [editableBlocks, setEditableBlocks] = useState<StudyBlock[]>([]);
+  const [editableDailyGoal, setEditableDailyGoal] = useState(dailyGoal);
 
   const handleOpen = () => {
     setEditableBlocks([...blocks]);
+    setEditableDailyGoal(dailyGoal);
     setIsOpen(true);
   };
 
@@ -65,7 +68,7 @@ export function CycleEditor({ blocks, onSave }: CycleEditorProps) {
   };
 
   const handleSave = () => {
-    onSave(editableBlocks);
+    onSave(editableBlocks, editableDailyGoal);
     setIsOpen(false);
   };
 
@@ -179,6 +182,19 @@ export function CycleEditor({ blocks, onSave }: CycleEditorProps) {
         </div>
 
         <div className="space-y-3 pt-3 border-t border-border">
+          {/* Daily Goal Configuration */}
+          <div className="flex items-center justify-between gap-3 p-3 bg-muted/50 rounded-lg">
+            <label className="text-sm font-medium">Meta diária de blocos:</label>
+            <Input
+              type="number"
+              min={1}
+              max={20}
+              value={editableDailyGoal}
+              onChange={(e) => setEditableDailyGoal(Math.max(1, Math.min(20, parseInt(e.target.value) || 1)))}
+              className="w-20 text-center"
+            />
+          </div>
+
           <Button
             variant="outline"
             onClick={handleAddBlock}
