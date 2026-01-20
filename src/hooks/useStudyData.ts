@@ -163,7 +163,7 @@ export function useStudyData() {
   }, [salvarDados]);
 
   // Atualizar blocos do ciclo
-  const atualizarBlocos = useCallback((newBlocks: StudyBlock[]) => {
+  const atualizarBlocos = useCallback((newBlocks: StudyBlock[], newDailyGoal: number) => {
     setData(prev => {
       // Ajusta o índice atual se necessário
       const newIndex = prev.currentBlockIndex >= newBlocks.length 
@@ -174,6 +174,7 @@ export function useStudyData() {
         ...prev,
         blocks: newBlocks,
         currentBlockIndex: newIndex,
+        dailyGoal: newDailyGoal,
       };
       salvarDados(newData);
       return newData;
