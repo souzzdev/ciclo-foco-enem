@@ -7,6 +7,7 @@ import { StudyHistory } from '@/components/StudyHistory';
 import { StreakBadge } from '@/components/StreakBadge';
 import { StatsDashboard } from '@/components/StatsDashboard';
 import { CycleEditor } from '@/components/CycleEditor';
+import { WeeklyGoalCard } from '@/components/WeeklyGoalCard';
 import { Loader2 } from 'lucide-react';
 
 const Index = () => {
@@ -39,7 +40,7 @@ const Index = () => {
             completedCycles={data.completedCycles} 
             totalMinutesStudied={data.totalMinutesStudied} 
           />
-          <CycleEditor blocks={data.blocks} dailyGoal={data.dailyGoal} onSave={atualizarBlocos} />
+          <CycleEditor blocks={data.blocks} dailyGoal={data.dailyGoal} weeklyGoalHours={data.weeklyGoalHours ?? 10} onSave={atualizarBlocos} />
         </div>
 
         <StreakBadge
@@ -47,6 +48,12 @@ const Index = () => {
           longestStreak={data.longestStreak}
           todayBlocks={data.todayBlocks}
           dailyGoal={data.dailyGoal}
+        />
+
+        <WeeklyGoalCard
+          history={data.history}
+          weeklyGoalHours={data.weeklyGoalHours ?? 10}
+          blockDurationMinutes={currentBlock.duration}
         />
         
         <CycleProgress 

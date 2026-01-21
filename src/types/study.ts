@@ -27,6 +27,7 @@ export interface StudyData {
   longestStreak: number;
   lastStudyDate: string | null;
   dailyGoal: number; // blocks per day
+  weeklyGoalHours: number; // hours per week
   todayBlocks: number;
   history: HistoryEntry[];
   blocks: StudyBlock[];
@@ -49,6 +50,7 @@ export const INITIAL_DATA: StudyData = {
   longestStreak: 0,
   lastStudyDate: null,
   dailyGoal: 3,
+  weeklyGoalHours: 10,
   todayBlocks: 0,
   history: [],
   blocks: INITIAL_BLOCKS,
