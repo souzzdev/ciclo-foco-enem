@@ -9,7 +9,8 @@ import { Settings, Plus, Trash2, GripVertical, Save, X } from 'lucide-react';
 interface CycleEditorProps {
   blocks: StudyBlock[];
   dailyGoal: number;
-  onSave: (blocks: StudyBlock[], dailyGoal: number) => void;
+  weeklyGoalHours: number;
+  onSave: (blocks: StudyBlock[], dailyGoal: number, weeklyGoalHours: number) => void;
 }
 
 const subjectTypes: { value: SubjectType; label: string; color: string }[] = [
@@ -21,14 +22,16 @@ const subjectTypes: { value: SubjectType; label: string; color: string }[] = [
 
 const durations = [15, 20, 25, 30, 45, 60];
 
-export function CycleEditor({ blocks, dailyGoal, onSave }: CycleEditorProps) {
+export function CycleEditor({ blocks, dailyGoal, weeklyGoalHours, onSave }: CycleEditorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [editableBlocks, setEditableBlocks] = useState<StudyBlock[]>([]);
   const [editableDailyGoal, setEditableDailyGoal] = useState(dailyGoal);
+  const [editableWeeklyGoal, setEditableWeeklyGoal] = useState(weeklyGoalHours);
 
   const handleOpen = () => {
     setEditableBlocks([...blocks]);
     setEditableDailyGoal(dailyGoal);
+    setEditableWeeklyGoal(weeklyGoalHours);
     setIsOpen(true);
   };
 
@@ -68,7 +71,7 @@ export function CycleEditor({ blocks, dailyGoal, onSave }: CycleEditorProps) {
   };
 
   const handleSave = () => {
-    onSave(editableBlocks, editableDailyGoal);
+    onSave(editableBlocks, editableDailyGoal, editableWeeklyGoal);
     setIsOpen(false);
   };
 
@@ -191,6 +194,19 @@ export function CycleEditor({ blocks, dailyGoal, onSave }: CycleEditorProps) {
               max={20}
               value={editableDailyGoal}
               onChange={(e) => setEditableDailyGoal(Math.max(1, Math.min(20, parseInt(e.target.value) || 1)))}
+              className="w-20 text-center"
+            />
+          </div>
+
+          {/* Weekly Goal Configuration */}
+          <div className="flex items-center justify-between gap-3 p-3 bg-muted/50 rounded-lg">
+            <label className="text-sm font-medium">Meta semanal (horas):</label>
+            <Input
+              type="number"
+              min={1}
+              max={100}
+              value={editableWeeklyGoal}
+              onChange={(e) => setEditableWeeklyGoal(Math.max(1, Math.min(100, parseInt(e.target.value) || 1)))}
               className="w-20 text-center"
             />
           </div>
