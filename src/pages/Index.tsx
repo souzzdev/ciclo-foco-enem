@@ -8,6 +8,7 @@ import { StreakBadge } from '@/components/StreakBadge';
 import { StatsDashboard } from '@/components/StatsDashboard';
 import { CycleEditor } from '@/components/CycleEditor';
 import { WeeklyGoalCard } from '@/components/WeeklyGoalCard';
+import { SubjectManager } from '@/components/SubjectManager';
 import { Loader2 } from 'lucide-react';
 
 const Index = () => {
@@ -72,6 +73,8 @@ const Index = () => {
           currentIndex={data.currentBlockIndex} 
         />
 
+        <SubjectManager />
+
         <StatsDashboard
           history={data.history}
           totalMinutes={data.totalMinutesStudied}
@@ -79,7 +82,7 @@ const Index = () => {
           skippedBlocks={data.skippedBlocks}
         />
         
-        <StudyHistory 
+        <StudyHistory
           history={data.history} 
           onClearHistory={limparHistorico} 
         />
