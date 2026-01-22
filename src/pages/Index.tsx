@@ -1,4 +1,5 @@
 import { useStudyData } from '@/hooks/useStudyData';
+import { useReviewSettings } from '@/hooks/useReviewSettings';
 import { StudyHeader } from '@/components/StudyHeader';
 import { CycleProgress } from '@/components/CycleProgress';
 import { CurrentStudyCard } from '@/components/CurrentStudyCard';
@@ -9,6 +10,7 @@ import { StatsDashboard } from '@/components/StatsDashboard';
 import { CycleEditor } from '@/components/CycleEditor';
 import { WeeklyGoalCard } from '@/components/WeeklyGoalCard';
 import { SubjectManager } from '@/components/SubjectManager';
+import { PendingReviews } from '@/components/PendingReviews';
 import { Loader2 } from 'lucide-react';
 
 const Index = () => {
@@ -22,7 +24,13 @@ const Index = () => {
     atualizarBlocos,
   } = useStudyData();
 
-  if (!isLoaded) {
+  const { 
+    settings: reviewSettings, 
+    isLoaded: reviewLoaded, 
+    updateInterval 
+  } = useReviewSettings();
+
+  if (!isLoaded || !reviewLoaded) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
@@ -55,6 +63,12 @@ const Index = () => {
           history={data.history}
           weeklyGoalHours={data.weeklyGoalHours ?? 10}
           blockDurationMinutes={currentBlock.duration}
+        />
+
+        <PendingReviews
+          history={data.history}
+          intervalDays={reviewSettings.intervalDays}
+          onIntervalChange={updateInterval}
         />
         
         <CycleProgress 
