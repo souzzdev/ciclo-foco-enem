@@ -31,7 +31,7 @@ export function StudyHeader({ completedCycles, totalMinutesStudied }: StudyHeade
         setMessageIndex((prev) => (prev + 1) % MOTIVATIONAL_MESSAGES.length);
         setIsAnimating(false);
       }, 300);
-    }, 5000);
+    }, 20000);
 
     return () => clearInterval(interval);
   }, []);
