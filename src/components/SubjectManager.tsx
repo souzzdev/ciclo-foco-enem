@@ -1,142 +1,207 @@
 /**
- * Componente de gerenciamento de matérias personalizadas
- * Permite criar, editar e remover matérias com cálculo automático de prioridade
+ * Componente de gerenciamento de materias personalizadas
+ * CRUD com cor, icone, dificuldade 1-5, conteudo 1-5, peso decimal
  */
 
 import { useState } from 'react';
-import { Plus, Trash2, GripVertical, BookOpen } from 'lucide-react';
+import { Plus, Trash2, ChevronUp, ChevronDown, BookOpen, Pencil, Check, X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { useSubjects } from '@/hooks/useSubjects';
-import { SubjectInput, SUBJECT_LIMITS } from '@/types/subject';
-import { getPriorityColor, getPriorityLabel, calculateStats } from '@/lib/subjectCalculations';
+import { Subject, SubjectInput, SUBJECT_LIMITS, WEIGHT_LIMITS, SUBJECT_COLORS } from '@/types/subject';
+import { getPriorityColor, getPriorityLabel } from '@/lib/subjectCalculations';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 
-/** Input numérico com slider visual */
-function NumericInput({
+interface SubjectManagerProps {
+  subjects: Subject[];
+  onAdd: (input: SubjectInput) => void;
+  onEdit: (id: string, updates: Partial<SubjectInput>) => void;
+  onRemove: (id: string) => void;
+  onReorder: (fromIndex: number, toIndex: number) => void;
+}
+
+function RatingInput({
   value,
   onChange,
   label,
+  max = SUBJECT_LIMITS.MAX,
 }: {
   value: number;
   onChange: (value: number) => void;
   label: string;
+  max?: number;
 }) {
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = parseFloat(e.target.value);
-    if (!isNaN(newValue)) {
-      onChange(newValue);
-    }
-  };
-
   return (
-    <div className="flex flex-col gap-1">
+    <div className="space-y-1">
       <span className="text-xs text-muted-foreground">{label}</span>
-      <div className="flex items-center gap-2">
-        <input
-          type="range"
-          min={SUBJECT_LIMITS.MIN}
-          max={SUBJECT_LIMITS.MAX}
-          step={SUBJECT_LIMITS.STEP}
-          value={value}
-          onChange={handleChange}
-          className="w-16 h-2 accent-primary"
-        />
-        <span className="text-sm font-medium w-8 text-center">{value}</span>
+      <div className="flex gap-1">
+        {Array.from({ length: max }).map((_, i) => (
+          <button
+            key={i}
+            onClick={() => onChange(i + 1)}
+            className="w-6 h-6 rounded-md text-xs font-bold transition-all duration-150"
+            style={{
+              backgroundColor: i < value ? 'hsl(var(--primary))' : 'hsl(var(--muted))',
+              color: i < value ? 'hsl(var(--primary-foreground))' : 'hsl(var(--muted-foreground))',
+            }}
+          >
+            {i + 1}
+          </button>
+        ))}
       </div>
     </div>
   );
 }
 
-/** Linha editável da tabela */
+function ColorSelect({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (color: string) => void;
+}) {
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {SUBJECT_COLORS.map(color => (
+        <button
+          key={color}
+          onClick={() => onChange(color)}
+          className="w-6 h-6 rounded-full transition-all duration-150 border-2"
+          style={{
+            backgroundColor: color,
+            borderColor: value === color ? 'hsl(var(--foreground))' : 'transparent',
+            transform: value === color ? 'scale(1.2)' : 'scale(1)',
+          }}
+          aria-label={`Cor ${color}`}
+        />
+      ))}
+    </div>
+  );
+}
+
 function SubjectRow({
   subject,
+  index,
+  total,
   onEdit,
   onRemove,
+  onMoveUp,
+  onMoveDown,
 }: {
-  subject: {
-    id: string;
-    name: string;
-    weight: number;
-    difficulty: number;
-    contentAmount: number;
-    priority: number;
-  };
+  subject: Subject;
+  index: number;
+  total: number;
   onEdit: (id: string, updates: Partial<SubjectInput>) => void;
   onRemove: (id: string) => void;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
 }) {
+  const [isEditing, setIsEditing] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
 
   return (
     <>
-      <TableRow className="group">
-        <TableCell className="w-8">
-          <GripVertical className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-        </TableCell>
-        <TableCell>
-          <Input
-            value={subject.name}
-            onChange={(e) => onEdit(subject.id, { name: e.target.value })}
-            className="h-8 bg-transparent border-transparent hover:border-input focus:border-input transition-colors"
-            placeholder="Nome da matéria"
+      <div className="p-3 bg-muted/30 rounded-xl space-y-3 transition-all duration-200">
+        {/* Top row: color indicator + name + actions */}
+        <div className="flex items-center gap-3">
+          <div
+            className="w-3 h-10 rounded-full shrink-0"
+            style={{ backgroundColor: subject.color }}
           />
-        </TableCell>
-        <TableCell>
-          <NumericInput
-            value={subject.weight}
-            onChange={(weight) => onEdit(subject.id, { weight })}
-            label="Peso"
-          />
-        </TableCell>
-        <TableCell>
-          <NumericInput
-            value={subject.difficulty}
-            onChange={(difficulty) => onEdit(subject.id, { difficulty })}
-            label="Dificuldade"
-          />
-        </TableCell>
-        <TableCell>
-          <NumericInput
-            value={subject.contentAmount}
-            onChange={(contentAmount) => onEdit(subject.id, { contentAmount })}
-            label="Conteúdo"
-          />
-        </TableCell>
-        <TableCell className="text-center">
-          <div className="flex flex-col items-center gap-0.5">
-            <span className={`text-lg font-bold ${getPriorityColor(subject.priority)}`}>
-              {subject.priority}
-            </span>
-            <span className="text-xs text-muted-foreground">
-              {getPriorityLabel(subject.priority)}
-            </span>
+          <div className="flex-1 min-w-0">
+            {isEditing ? (
+              <Input
+                value={subject.name}
+                onChange={e => onEdit(subject.id, { name: e.target.value })}
+                className="h-8 text-sm"
+                autoFocus
+              />
+            ) : (
+              <div>
+                <p className="font-semibold text-foreground text-sm truncate">{subject.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  {subject.hours}h no ciclo &middot;{' '}
+                  <span className={getPriorityColor(subject.priority)}>
+                    {getPriorityLabel(subject.priority)} ({subject.priority})
+                  </span>
+                </p>
+              </div>
+            )}
           </div>
-        </TableCell>
-        <TableCell>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsRemoving(true)}
-            className="h-8 w-8 text-muted-foreground hover:text-destructive"
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
-        </TableCell>
-      </TableRow>
+
+          <div className="flex items-center gap-1 shrink-0">
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onMoveUp} disabled={index === 0}>
+              <ChevronUp className="w-4 h-4" />
+            </Button>
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onMoveDown} disabled={index === total - 1}>
+              <ChevronDown className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={() => setIsEditing(!isEditing)}
+            >
+              {isEditing ? <Check className="w-4 h-4 text-primary" /> : <Pencil className="w-4 h-4" />}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 text-muted-foreground hover:text-destructive"
+              onClick={() => setIsRemoving(true)}
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Editing panel */}
+        {isEditing && (
+          <div className="space-y-3 pt-2 border-t border-border/50 fade-in">
+            <div className="grid grid-cols-2 gap-3">
+              <RatingInput
+                value={subject.difficulty}
+                onChange={v => onEdit(subject.id, { difficulty: v })}
+                label="Dificuldade"
+              />
+              <RatingInput
+                value={subject.contentAmount}
+                onChange={v => onEdit(subject.id, { contentAmount: v })}
+                label="Conteudo"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <span className="text-xs text-muted-foreground">Peso ({WEIGHT_LIMITS.MIN} - {WEIGHT_LIMITS.MAX})</span>
+              <div className="flex items-center gap-2">
+                <input
+                  type="range"
+                  min={WEIGHT_LIMITS.MIN}
+                  max={WEIGHT_LIMITS.MAX}
+                  step={WEIGHT_LIMITS.STEP}
+                  value={subject.weight}
+                  onChange={e => onEdit(subject.id, { weight: parseFloat(e.target.value) })}
+                  className="flex-1 h-2 accent-primary"
+                />
+                <span className="text-sm font-medium w-8 text-center text-foreground">{subject.weight}</span>
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <span className="text-xs text-muted-foreground">Cor</span>
+              <ColorSelect
+                value={subject.color}
+                onChange={color => onEdit(subject.id, { color })}
+              />
+            </div>
+          </div>
+        )}
+      </div>
 
       <ConfirmDialog
         isOpen={isRemoving}
-        title="Remover matéria"
-        message={`Deseja realmente remover "${subject.name}"?`}
+        title="Remover materia"
+        message={`Deseja realmente remover "${subject.name}"? O progresso sera perdido.`}
         confirmText="Remover"
         variant="warning"
         onConfirm={() => {
@@ -149,29 +214,15 @@ function SubjectRow({
   );
 }
 
-/** Componente principal de gerenciamento */
-export function SubjectManager() {
-  const { subjects, isLoaded, addSubject, editSubject, removeSubject } = useSubjects();
-  const stats = calculateStats(subjects);
-
+export function SubjectManager({ subjects, onAdd, onEdit, onRemove, onReorder }: SubjectManagerProps) {
   const handleAddSubject = () => {
-    addSubject({
-      name: `Matéria ${subjects.length + 1}`,
+    onAdd({
+      name: `Materia ${subjects.length + 1}`,
       weight: 1.5,
-      difficulty: 1.5,
-      contentAmount: 1.5,
+      difficulty: 3,
+      contentAmount: 3,
     });
   };
-
-  if (!isLoaded) {
-    return (
-      <Card>
-        <CardContent className="py-8">
-          <p className="text-center text-muted-foreground">Carregando...</p>
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <Card>
@@ -179,7 +230,7 @@ export function SubjectManager() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <BookOpen className="w-5 h-5 text-primary" />
-            <CardTitle className="text-lg">Minhas Matérias</CardTitle>
+            <CardTitle className="text-lg">Minhas Materias</CardTitle>
           </div>
           <Button size="sm" onClick={handleAddSubject}>
             <Plus className="w-4 h-4 mr-1" />
@@ -188,8 +239,8 @@ export function SubjectManager() {
         </div>
         {subjects.length > 0 && (
           <p className="text-sm text-muted-foreground mt-1">
-            {stats.totalSubjects} matéria{stats.totalSubjects !== 1 ? 's' : ''} · 
-            Prioridade média: <span className="font-medium">{stats.averagePriority}</span>
+            {subjects.length} materia{subjects.length !== 1 ? 's' : ''} &middot;{' '}
+            {subjects.reduce((sum, s) => sum + s.hours, 0)}h no ciclo
           </p>
         )}
       </CardHeader>
@@ -198,48 +249,25 @@ export function SubjectManager() {
         {subjects.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-50" />
-            <p className="font-medium">Nenhuma matéria cadastrada</p>
+            <p className="font-medium">Nenhuma materia cadastrada</p>
             <p className="text-sm mt-1">
-              Adicione matérias para calcular suas prioridades de estudo
+              Adicione materias para calcular suas prioridades e gerar o ciclo de estudos
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto -mx-6">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-8"></TableHead>
-                  <TableHead className="min-w-[150px]">Matéria</TableHead>
-                  <TableHead className="min-w-[100px]">Peso</TableHead>
-                  <TableHead className="min-w-[100px]">Dificuldade</TableHead>
-                  <TableHead className="min-w-[100px]">Conteúdo</TableHead>
-                  <TableHead className="text-center min-w-[80px]">Prioridade</TableHead>
-                  <TableHead className="w-12"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {subjects.map((subject) => (
-                  <SubjectRow
-                    key={subject.id}
-                    subject={subject}
-                    onEdit={editSubject}
-                    onRemove={removeSubject}
-                  />
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
-
-        {subjects.length > 0 && stats.highestPriority && (
-          <div className="mt-4 p-3 bg-muted/50 rounded-lg">
-            <p className="text-sm">
-              <span className="text-muted-foreground">Maior prioridade:</span>{' '}
-              <span className="font-semibold">{stats.highestPriority.name}</span>
-              <span className={`ml-2 font-bold ${getPriorityColor(stats.highestPriority.priority)}`}>
-                ({stats.highestPriority.priority})
-              </span>
-            </p>
+          <div className="space-y-2">
+            {subjects.map((subject, index) => (
+              <SubjectRow
+                key={subject.id}
+                subject={subject}
+                index={index}
+                total={subjects.length}
+                onEdit={onEdit}
+                onRemove={onRemove}
+                onMoveUp={() => onReorder(index, index - 1)}
+                onMoveDown={() => onReorder(index, index + 1)}
+              />
+            ))}
           </div>
         )}
       </CardContent>

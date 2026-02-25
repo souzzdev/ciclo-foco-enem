@@ -1,51 +1,44 @@
-export type SubjectType = 'math' | 'nature' | 'portuguese' | 'human';
-
-export interface StudyBlock {
-  id: number;
-  subject: string;
-  subjectType: SubjectType;
-  content: string;
-  duration: number; // in minutes
-}
-
 export interface HistoryEntry {
   id: string;
   date: string;
-  subject: string;
-  subjectType: SubjectType;
+  subjectId: string;
+  subjectName: string;
+  subjectColor: string;
   content: string;
-  blockId: number;
   skipped?: boolean;
 }
 
-export interface StudyData {
-  currentBlockIndex: number;
+export interface CycleHistoryEntry {
+  id: string;
+  completedAt: string;
+  totalHours: number;
+  completedHours: number;
+  subjects: Array<{
+    name: string;
+    color: string;
+    hours: number;
+    completedHours: number;
+  }>;
+}
+
+export interface CycleData {
+  totalCycleTime: number;
   completedCycles: number;
   totalMinutesStudied: number;
-  skippedBlocks: number;
   currentStreak: number;
   longestStreak: number;
   lastStudyDate: string | null;
-  dailyGoal: number; // blocks per day
-  weeklyGoalHours: number; // hours per week
+  dailyGoal: number;
+  weeklyGoalHours: number;
   todayBlocks: number;
   history: HistoryEntry[];
-  blocks: StudyBlock[];
+  cycleHistory: CycleHistoryEntry[];
 }
 
-export const INITIAL_BLOCKS: StudyBlock[] = [
-  { id: 1, subject: 'Matemática', subjectType: 'math', content: '', duration: 30 },
-  { id: 2, subject: 'Matemática', subjectType: 'math', content: '', duration: 30 },
-  { id: 3, subject: 'Ciências da Natureza', subjectType: 'nature', content: '', duration: 30 },
-  { id: 4, subject: 'Português', subjectType: 'portuguese', content: '', duration: 30 },
-  { id: 5, subject: 'Ciências Humanas', subjectType: 'human', content: '', duration: 30 },
-];
-
-export const INITIAL_DATA: StudyData = {
-  currentBlockIndex: 0,
+export const INITIAL_CYCLE_DATA: CycleData = {
+  totalCycleTime: 40,
   completedCycles: 0,
   totalMinutesStudied: 0,
-  skippedBlocks: 0,
   currentStreak: 0,
   longestStreak: 0,
   lastStudyDate: null,
@@ -53,5 +46,5 @@ export const INITIAL_DATA: StudyData = {
   weeklyGoalHours: 10,
   todayBlocks: 0,
   history: [],
-  blocks: INITIAL_BLOCKS,
+  cycleHistory: [],
 };
