@@ -1,8 +1,8 @@
 import { Button } from '@/components/ui/button';
-import { Download, FileText } from 'lucide-react';
+import { Download, FileText, Table2 } from 'lucide-react';
 import { Subject } from '@/types/subject';
 import { CycleData } from '@/types/study';
-import { exportCSV, exportPDF } from '@/lib/exportUtils';
+import { exportCSV, exportPDF, exportExcel } from '@/lib/exportUtils';
 
 interface ExportButtonsProps {
   subjects: Subject[];
@@ -26,7 +26,16 @@ export function ExportButtons({ subjects, cycleData }: ExportButtonsProps) {
       <Button
         variant="outline"
         size="sm"
-        onClick={exportPDF}
+        onClick={() => exportExcel(subjects, cycleData)}
+        className="text-xs"
+      >
+        <Table2 className="w-3.5 h-3.5 mr-1.5" />
+        Excel
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => exportPDF(subjects, cycleData)}
         className="text-xs"
       >
         <FileText className="w-3.5 h-3.5 mr-1.5" />

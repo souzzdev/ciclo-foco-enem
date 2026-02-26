@@ -1,13 +1,84 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { HistoryEntry } from '@/types/study';
 import { Subject } from '@/types/subject';
-import { BarChart3, ChevronDown, ChevronUp, PieChart, TrendingUp, AlertTriangle } from 'lucide-react';
+import { BarChart3, ChevronDown, ChevronUp, PieChart, TrendingUp, AlertTriangle, CalendarDays, Flame } from 'lucide-react';
 
 interface StatsDashboardProps {
   history: HistoryEntry[];
   totalMinutes: number;
   completedCycles: number;
   subjects: Subject[];
+}
+
+function ConsistencyHeatmap({ history }: { history: HistoryEntry[] }) {
+  const heatmapData = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const days: { date: Date; count: number; dateStr: string }[] = [];
+
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toDateString();
+      const count = history.filter(
+        e => !e.skipped && new Date(e.date).toDateString() === dateStr
+      ).length;
+      days.push({ date: d, count, dateStr });
+    }
+
+    const maxCount = Math.max(...days.map(d => d.count), 1);
+    const activeDays = days.filter(d => d.count > 0).length;
+    const rate = Math.round((activeDays / 30) * 100);
+
+    return { days, maxCount, activeDays, rate };
+  }, [history]);
+
+  const getIntensity = (count: number): string => {
+    if (count === 0) return 'bg-muted';
+    const ratio = count / heatmapData.maxCount;
+    if (ratio <= 0.25) return 'bg-primary/25';
+    if (ratio <= 0.5) return 'bg-primary/50';
+    if (ratio <= 0.75) return 'bg-primary/75';
+    return 'bg-primary';
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-3">
+        <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+          <CalendarDays className="w-4 h-4" />
+          Consistencia (30 dias)
+        </h4>
+        <div className="flex items-center gap-1.5">
+          <Flame className="w-4 h-4 text-orange-500" />
+          <span className="text-sm font-semibold text-foreground">{heatmapData.rate}%</span>
+          <span className="text-xs text-muted-foreground">({heatmapData.activeDays}/30 dias)</span>
+        </div>
+      </div>
+
+      {/* Heatmap grid: 6 columns x 5 rows */}
+      <div className="grid grid-cols-10 gap-1">
+        {heatmapData.days.map((day) => (
+          <div
+            key={day.dateStr}
+            className={`aspect-square rounded-sm transition-colors duration-200 ${getIntensity(day.count)}`}
+            title={`${day.date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}: ${day.count} bloco${day.count !== 1 ? 's' : ''}`}
+          />
+        ))}
+      </div>
+
+      {/* Legend */}
+      <div className="flex items-center justify-end gap-1 mt-2">
+        <span className="text-xs text-muted-foreground mr-1">Menos</span>
+        <div className="w-3 h-3 rounded-sm bg-muted" />
+        <div className="w-3 h-3 rounded-sm bg-primary/25" />
+        <div className="w-3 h-3 rounded-sm bg-primary/50" />
+        <div className="w-3 h-3 rounded-sm bg-primary/75" />
+        <div className="w-3 h-3 rounded-sm bg-primary" />
+        <span className="text-xs text-muted-foreground ml-1">Mais</span>
+      </div>
+    </div>
+  );
 }
 
 export function StatsDashboard({ history, totalMinutes, completedCycles, subjects }: StatsDashboardProps) {
@@ -50,7 +121,6 @@ export function StatsDashboard({ history, totalMinutes, completedCycles, subject
   subjects.forEach(s => {
     subjectColorMap[s.name] = s.color;
   });
-  // Also get colors from history entries
   history.forEach(e => {
     if (!subjectColorMap[e.subjectName] && e.subjectColor) {
       subjectColorMap[e.subjectName] = e.subjectColor;
@@ -99,6 +169,9 @@ export function StatsDashboard({ history, totalMinutes, completedCycles, subject
               <p className="text-xs text-muted-foreground">Ciclos</p>
             </div>
           </div>
+
+          {/* Consistency Heatmap */}
+          <ConsistencyHeatmap history={history} />
 
           {/* Per-subject chart */}
           <div>

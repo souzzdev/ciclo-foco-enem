@@ -1,16 +1,18 @@
 /**
  * Componente de gerenciamento de materias personalizadas
  * CRUD com cor, icone, dificuldade 1-5, conteudo 1-5, peso decimal
+ * Drag & drop para reordenar, seletor de icone Lucide
  */
 
-import { useState } from 'react';
-import { Plus, Trash2, ChevronUp, ChevronDown, BookOpen, Pencil, Check, X } from 'lucide-react';
+import { useState, useRef, useCallback } from 'react';
+import { Plus, Trash2, GripVertical, BookOpen, Pencil, Check } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Subject, SubjectInput, SUBJECT_LIMITS, WEIGHT_LIMITS, SUBJECT_COLORS } from '@/types/subject';
+import { Subject, SubjectInput, SUBJECT_LIMITS, WEIGHT_LIMITS, SUBJECT_COLORS, SUBJECT_ICONS } from '@/types/subject';
 import { getPriorityColor, getPriorityLabel } from '@/lib/subjectCalculations';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
+import { DynamicIcon } from '@/components/DynamicIcon';
 
 interface SubjectManagerProps {
   subjects: Subject[];
@@ -79,35 +81,94 @@ function ColorSelect({
   );
 }
 
+function IconSelect({
+  value,
+  onChange,
+  color,
+}: {
+  value: string;
+  onChange: (icon: string) => void;
+  color: string;
+}) {
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {SUBJECT_ICONS.map(iconName => (
+        <button
+          key={iconName}
+          onClick={() => onChange(iconName)}
+          className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-150 border-2"
+          style={{
+            backgroundColor: value === iconName ? `${color}20` : 'transparent',
+            borderColor: value === iconName ? color : 'hsl(var(--border))',
+          }}
+          aria-label={`Icone ${iconName}`}
+        >
+          <DynamicIcon
+            name={iconName}
+            className="w-4 h-4"
+            style={{ color: value === iconName ? color : 'hsl(var(--muted-foreground))' }}
+          />
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function SubjectRow({
   subject,
   index,
   total,
   onEdit,
   onRemove,
-  onMoveUp,
-  onMoveDown,
+  onDragStart,
+  onDragOver,
+  onDragEnd,
+  onDrop,
+  isDragging,
+  isDragOver,
 }: {
   subject: Subject;
   index: number;
   total: number;
   onEdit: (id: string, updates: Partial<SubjectInput>) => void;
   onRemove: (id: string) => void;
-  onMoveUp: () => void;
-  onMoveDown: () => void;
+  onDragStart: (index: number) => void;
+  onDragOver: (e: React.DragEvent, index: number) => void;
+  onDragEnd: () => void;
+  onDrop: (e: React.DragEvent, index: number) => void;
+  isDragging: boolean;
+  isDragOver: boolean;
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
 
   return (
     <>
-      <div className="p-3 bg-muted/30 rounded-xl space-y-3 transition-all duration-200">
-        {/* Top row: color indicator + name + actions */}
-        <div className="flex items-center gap-3">
+      <div
+        className={`p-3 bg-muted/30 rounded-xl space-y-3 transition-all duration-200 ${
+          isDragging ? 'dragging' : ''
+        } ${isDragOver ? 'drag-over' : ''}`}
+        draggable
+        onDragStart={() => onDragStart(index)}
+        onDragOver={(e) => onDragOver(e, index)}
+        onDragEnd={onDragEnd}
+        onDrop={(e) => onDrop(e, index)}
+      >
+        {/* Top row: drag handle + icon + name + actions */}
+        <div className="flex items-center gap-2">
+          <div className="drag-handle shrink-0 p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+            <GripVertical className="w-4 h-4" />
+          </div>
           <div
-            className="w-3 h-10 rounded-full shrink-0"
-            style={{ backgroundColor: subject.color }}
-          />
+            className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+            style={{ backgroundColor: `${subject.color}20` }}
+          >
+            <DynamicIcon
+              name={subject.icon}
+              className="w-4 h-4"
+              style={{ color: subject.color }}
+            />
+          </div>
           <div className="flex-1 min-w-0">
             {isEditing ? (
               <Input
@@ -130,12 +191,6 @@ function SubjectRow({
           </div>
 
           <div className="flex items-center gap-1 shrink-0">
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onMoveUp} disabled={index === 0}>
-              <ChevronUp className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onMoveDown} disabled={index === total - 1}>
-              <ChevronDown className="w-4 h-4" />
-            </Button>
             <Button
               variant="ghost"
               size="icon"
@@ -188,6 +243,15 @@ function SubjectRow({
             </div>
 
             <div className="space-y-1">
+              <span className="text-xs text-muted-foreground">Icone</span>
+              <IconSelect
+                value={subject.icon}
+                onChange={icon => onEdit(subject.id, { icon })}
+                color={subject.color}
+              />
+            </div>
+
+            <div className="space-y-1">
               <span className="text-xs text-muted-foreground">Cor</span>
               <ColorSelect
                 value={subject.color}
@@ -215,6 +279,32 @@ function SubjectRow({
 }
 
 export function SubjectManager({ subjects, onAdd, onEdit, onRemove, onReorder }: SubjectManagerProps) {
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
+  const handleDragStart = useCallback((index: number) => {
+    setDragIndex(index);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    setDragOverIndex(index);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent, toIndex: number) => {
+    e.preventDefault();
+    if (dragIndex !== null && dragIndex !== toIndex) {
+      onReorder(dragIndex, toIndex);
+    }
+    setDragIndex(null);
+    setDragOverIndex(null);
+  }, [dragIndex, onReorder]);
+
+  const handleDragEnd = useCallback(() => {
+    setDragIndex(null);
+    setDragOverIndex(null);
+  }, []);
+
   const handleAddSubject = () => {
     onAdd({
       name: `Materia ${subjects.length + 1}`,
@@ -241,6 +331,9 @@ export function SubjectManager({ subjects, onAdd, onEdit, onRemove, onReorder }:
           <p className="text-sm text-muted-foreground mt-1">
             {subjects.length} materia{subjects.length !== 1 ? 's' : ''} &middot;{' '}
             {subjects.reduce((sum, s) => sum + s.hours, 0)}h no ciclo
+            {subjects.length > 1 && (
+              <span className="ml-1 text-xs opacity-70">&middot; Arraste para reordenar</span>
+            )}
           </p>
         )}
       </CardHeader>
@@ -264,8 +357,12 @@ export function SubjectManager({ subjects, onAdd, onEdit, onRemove, onReorder }:
                 total={subjects.length}
                 onEdit={onEdit}
                 onRemove={onRemove}
-                onMoveUp={() => onReorder(index, index - 1)}
-                onMoveDown={() => onReorder(index, index + 1)}
+                onDragStart={handleDragStart}
+                onDragOver={handleDragOver}
+                onDragEnd={handleDragEnd}
+                onDrop={handleDrop}
+                isDragging={dragIndex === index}
+                isDragOver={dragOverIndex === index && dragIndex !== index}
               />
             ))}
           </div>
