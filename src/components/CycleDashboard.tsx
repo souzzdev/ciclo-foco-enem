@@ -2,6 +2,7 @@ import { Subject } from '@/types/subject';
 import { SubjectCard } from './SubjectCard';
 import { Progress } from '@/components/ui/progress';
 import { Target, Clock, TrendingUp } from 'lucide-react';
+import { DynamicIcon } from './DynamicIcon';
 
 interface CycleDashboardProps {
   subjects: Subject[];
@@ -74,8 +75,8 @@ export function CycleDashboard({
           </div>
         )}
 
-        {/* Subject mini bars */}
-        <div className="mt-4 flex gap-1.5">
+        {/* Subject mini bars with icons */}
+        <div className="mt-4 space-y-1.5">
           {subjects.map(subject => {
             const pct = subject.hours > 0
               ? (subject.completedHours / subject.hours) * 100
@@ -83,16 +84,24 @@ export function CycleDashboard({
             return (
               <div
                 key={subject.id}
-                className="flex-1 h-2 rounded-full overflow-hidden bg-muted"
+                className="flex items-center gap-2"
                 title={`${subject.name}: ${Math.round(pct)}%`}
               >
-                <div
-                  className="h-full rounded-full transition-all duration-500"
-                  style={{
-                    width: `${pct}%`,
-                    backgroundColor: subject.color,
-                  }}
+                <DynamicIcon
+                  name={subject.icon}
+                  className="w-3.5 h-3.5 shrink-0"
+                  style={{ color: subject.color }}
                 />
+                <div className="flex-1 h-2 rounded-full overflow-hidden bg-muted">
+                  <div
+                    className="h-full rounded-full transition-all duration-500"
+                    style={{
+                      width: `${pct}%`,
+                      backgroundColor: subject.color,
+                    }}
+                  />
+                </div>
+                <span className="text-xs text-muted-foreground tabular-nums w-8 text-right">{Math.round(pct)}%</span>
               </div>
             );
           })}
@@ -106,11 +115,12 @@ export function CycleDashboard({
 
       {/* Subject Cards Grid */}
       <div className="grid gap-4 sm:grid-cols-2">
-        {subjects.map(subject => (
+        {subjects.map((subject, index) => (
           <SubjectCard
             key={subject.id}
             subject={subject}
             onToggleHour={onToggleHour}
+            style={{ animationDelay: `${index * 80}ms` }}
           />
         ))}
       </div>
