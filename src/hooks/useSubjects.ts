@@ -11,7 +11,7 @@ const CYCLE_KEY = 'ciclo-estudos-cycle-hours';
 
 export function useSubjects() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [totalCycleHours, setTotalCycleHours] = useState(CYCLE_LIMITS.DEFAULT_HOURS);
+  const [totalCycleHours, setTotalCycleHours] = useState<number>(CYCLE_LIMITS.DEFAULT_HOURS);
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Carregar dados do localStorage
