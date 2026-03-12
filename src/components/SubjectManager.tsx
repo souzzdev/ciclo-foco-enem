@@ -160,7 +160,7 @@ function SubjectCard({
                       className={`w-7 h-7 rounded-full transition-all ${
                         subject.color === color ? 'ring-2 ring-offset-2 ring-offset-background scale-110' : 'hover:scale-110'
                       }`}
-                      style={{ backgroundColor: color, ringColor: color }}
+                      style={{ backgroundColor: color }}
                     />
                   ))}
                 </div>
